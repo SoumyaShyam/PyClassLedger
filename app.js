@@ -8,6 +8,7 @@ $(function () {
   const $scanStatus = $("#scan-status");
   let inventory = [];
   let hasScannedFolder = false;
+  let scanSequence = 0;
 
   function maskStringsAndComments(source) {
     const characters = source.split("");
@@ -85,8 +86,10 @@ $(function () {
 
   function findClassNames(source) {
     const code = maskStringsAndComments(source.replace(/^\uFEFF/, ""));
-    const classPattern = /^[\t ]*class[\t ]+([\p{ID_Start}_][\p{ID_Continue}]*)/gmu;
-    return Array.from(code.matchAll(classPattern), (match) => match[1]);
+    const classPattern = /^([\t ]*)class[\t ]+([\p{ID_Start}_][\p{ID_Continue}]*)/gmu;
+    return Array.from(code.matchAll(classPattern))
+      .filter((match) => match[2] !== "Meta" || match[1].length === 0)
+      .map((match) => match[2]);
   }
 
   function escapeHtml(value) {
@@ -131,7 +134,9 @@ $(function () {
   }
 
   function csvCell(value) {
-    return `"${String(value).replace(/"/g, '""')}"`;
+    const text = String(value);
+    const safeText = /^[\t\r\n ]*[=+\-@]/.test(text) ? `'${text}` : text;
+    return `"${safeText.replace(/"/g, '""')}"`;
   }
 
   function downloadCsv() {
@@ -152,18 +157,24 @@ $(function () {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   async function scanFolder(files) {
+    const sequence = ++scanSequence;
     hasScannedFolder = true;
-    const pythonFiles = Array.from(files)
-      .filter((file) => file.name.toLocaleLowerCase().endsWith(".py"))
+    const candidateFiles = Array.from(files)
+      .filter((file) => file.name.toLocaleLowerCase().endsWith(".py"));
+    const excludedFiles = candidateFiles.filter((file) => /serializers|bkup|bkp/i.test(file.name));
+    const pythonFiles = candidateFiles
+      .filter((file) => !/serializers|bkup|bkp/i.test(file.name))
       .sort((left, right) => left.webkitRelativePath.localeCompare(right.webkitRelativePath));
 
     if (pythonFiles.length === 0) {
       inventory = [];
-      $scanStatus.text("No .py files were found in the selected folder.");
+      $scanStatus.text(excludedFiles.length
+        ? `No Python files to analyze; skipped ${excludedFiles.length} excluded ${excludedFiles.length === 1 ? "file" : "files"}.`
+        : "No .py files were found in the selected folder.");
       $("#file-count").text("0");
       $("#class-count").text("0");
       $exportButton.prop("disabled", true);
@@ -177,10 +188,14 @@ $(function () {
       const path = file.webkitRelativePath || file.name;
       try {
         return { path, classes: findClassNames(await file.text()), error: false };
-      } catch (error) {
+      } catch {
         return { path, classes: [], error: true };
       }
     }));
+
+    if (sequence !== scanSequence) {
+      return;
+    }
 
     inventory = results;
     const classCount = inventory.reduce((total, file) => total + file.classes.length, 0);
@@ -189,9 +204,13 @@ $(function () {
     $("#class-count").text(String(classCount));
     $exportButton.prop("disabled", false);
     $searchInput.prop("disabled", false);
-    $scanStatus.text(errorCount
-      ? `Scanned ${inventory.length - errorCount} files; ${errorCount} could not be read.`
-      : `Scanned ${inventory.length} Python ${inventory.length === 1 ? "file" : "files"}.`);
+    const status = errorCount
+      ? `Scanned ${inventory.length - errorCount} of ${inventory.length} files; ${errorCount} could not be read.`
+      : `Scanned ${inventory.length} Python ${inventory.length === 1 ? "file" : "files"}.`;
+    const exclusionStatus = excludedFiles.length
+      ? ` Skipped ${excludedFiles.length} excluded ${excludedFiles.length === 1 ? "file" : "files"}.`
+      : "";
+    $scanStatus.text(`${status}${exclusionStatus}`);
     renderResults();
   }
 

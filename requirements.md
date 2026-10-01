@@ -2,7 +2,7 @@
 
 ## Version
 
-`v0.0.1`
+`v0.0.3`
 
 ## Prompt Change Log
 
@@ -18,6 +18,22 @@ Initial requirements supplied for the AI prompt:
 - Create `documentation.md` to record development objectives, plans, and change logs.
 - Create `requirements.md` to record requirement changes given through AI prompts.
 - Maintain semantic versioning in the format `v<major>.<minor>.<patch>`, starting at `v0.0.1`.
+
+### v0.0.2 - 2026-10-01
+
+Requirement update supplied for the AI prompt:
+
+- Ignore files during analysis when their filenames contain `serializers`, `bkup`, or `bkp`.
+
+Interpretation: apply these filename exclusions case-insensitively to Python files before reading their contents.
+
+### v0.0.3 - 2026-10-01
+
+Requirement update supplied for the AI prompt:
+
+- Do not consider subclass `Meta` from the models.
+
+Interpretation: omit indented `Meta` class declarations, commonly used for model metadata, from inventory results; retain top-level `Meta` classes.
 
 ## Requirement Update Process
 

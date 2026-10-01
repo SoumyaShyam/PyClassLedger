@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5ee">
+  <title>PyClassLedger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="PyClassLedger home">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span>PyClassLedger</span>
+      </a>
+      <span class="version">VERSION <strong>v0.0.1</strong></span>
+    </header>
+
+    <section class="workspace" aria-labelledby="page-title">
+      <div class="intro">
+        <p class="eyebrow">PYTHON INVENTORY</p>
+        <h1 id="page-title">Know every class<br>in your codebase.</h1>
+        <p class="lead">Choose a folder to build a clear, downloadable index of its Python classes.</p>
+      </div>
+
+      <section class="scan-panel" aria-label="Folder scanner">
+        <div class="scan-controls">
+          <div class="folder-symbol" aria-hidden="true">/</div>
+          <div class="scan-copy">
+            <h2 id="scan-heading">Start with a folder</h2>
+            <p id="scan-status" role="status" aria-live="polite">Your files stay in this browser and are not uploaded.</p>
+          </div>
+          <input id="folder-input" class="visually-hidden" type="file" webkitdirectory directory multiple>
+          <label class="button button-primary" for="folder-input">Choose folder</label>
+        </div>
+        <div class="summary" aria-label="Scan summary">
+          <div><span class="summary-value" id="file-count">0</span><span class="summary-label">Python files</span></div>
+          <div><span class="summary-value" id="class-count">0</span><span class="summary-label">Classes found</span></div>
+          <button id="export-button" class="button button-secondary" type="button" disabled>Download CSV</button>
+        </div>
+      </section>
+
+      <section class="results" aria-labelledby="results-heading">
+        <div class="results-heading">
+          <div>
+            <p class="eyebrow">FOLDER CONTENTS</p>
+            <h2 id="results-heading">Class inventory</h2>
+          </div>
+          <label class="search-box">
+            <span class="visually-hidden">Filter files or classes</span>
+            <span aria-hidden="true">⌕</span>
+            <input id="search-input" type="search" placeholder="Filter files or classes" autocomplete="off" disabled>
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th scope="col">Python file</th><th scope="col">Classes</th></tr>
+            </thead>
+            <tbody id="results-body">
+              <tr class="empty-row"><td colspan="2">Choose a folder to see its Python files.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="result-count" class="result-count" aria-live="polite"></p>
+      </section>
+
+      <footer class="footer">
+        <span>PyClassLedger <span aria-hidden="true">·</span> v0.0.1</span>
+        <span>Local analysis. No uploads.</span>
+      </footer>
+    </section>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="app.js"></script>
+</body>
+</html>
